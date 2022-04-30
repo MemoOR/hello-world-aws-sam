@@ -1,0 +1,44 @@
+# This is a basic workflow to help you get started with Actions
+
+name: SAM Validate, Build, Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  sam-validate-build-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: check python version
+        run: python3 --version
+      
+      - name: Install Dependencies with Apt Get
+        run: |
+          sudo apt-get update
+          sudo apt-get install python3.7 -y
+           
+      - name: Configure AWS credentials
+        id: creds
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          # aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: SAM Validate
+        run: |
+          sam validate
+      
+      - name: SAM Build
+        run: |
+          sam build --use-container
+           
+      - name: SAM Deploy
+        run: |
+          # Run SAM Deploy
+          sam deploy --no-fail-on-empty-changeset
